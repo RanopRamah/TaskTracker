@@ -85,7 +85,27 @@ func HandleAddTask(w http.ResponseWriter, r *http.Request) {
 		}
 		tmpl.Execute(w, nil)
 	}
+func HandleUpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
+	db := database.GetDB()
+    taskID := r.URL.Query().Get("id")
+    completed := r.URL.Query().Get("completed")
 
+    completedInt, err := strconv.Atoi(completed)
+    if err != nil {
+        http.Error(w, "Invalid status", http.StatusBadRequest)
+        return
+    }
+
+    query := "UPDATE tasks SET completed = ? WHERE id = ?"
+    _, err = db.Exec(query, completedInt, taskID)
+    if err != nil {
+        http.Error(w, "Failed to update task status", http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]string{"status": "success"})
+}
 
 	
 	

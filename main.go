@@ -20,9 +20,11 @@ func main() {
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", handlers.ServeHome)
+	http.HandleFunc("/register", handlers.HandleRegister)
 	http.HandleFunc("/login", handlers.HandleLogin)
 	http.HandleFunc("/logout", handlers.HandleLogout)
 	http.HandleFunc("/add-task", handlers.HandleAddTask)
+	http.HandleFunc("/update-status", handlers.HandleUpdateTaskStatus)
 	http.HandleFunc("/delete-task", handlers.HandleDeleteTask)
 	http.HandleFunc("/update-task", handlers.HandleUpdateTask)
 

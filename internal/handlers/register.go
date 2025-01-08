@@ -8,7 +8,7 @@ import (
 	"html/template"
 )
 
-func handleRegister(w http.ResponseWriter, r *http.Request) {
+func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	var errorMessage string
 
 	// Get the DB connection
