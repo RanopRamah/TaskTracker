@@ -1,83 +1,127 @@
-function fetchTasks() {
-    fetch('/tasks')
-        .then(response => response.json())
-        .then(data => {
-            const taskList = document.getElementById('taskList');
-            taskList.innerHTML = '';
-            data.forEach(task => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="updateTasks()">
-                    <span class="${task.completed ? 'completed' : ''}">${task.text}</span>
-                    <button class="edit" onclick="editTask(this)">Edit</button>
-                    <button class="remove" onclick="removeTask(this)">Hapus</button>
-                `;
-                taskList.appendChild(li);
-            });
-        });
-}
+const form = document.getElementById("addTaskForm");
 
-function addTask() {
-    const taskInput = document.getElementById('taskInput');
-    const taskValue = taskInput.value.trim();
+form.addEventListener("submit", function (event) {
+  event.preventDefault();
 
-    if (taskValue === '') {
-        alert('Tugas tidak boleh kosong!');
-        return;
-    }
+  const taskMatkul = document.getElementById("taskMatkul").value;
+  let deadline = document.getElementById("deadline").value;
 
-    fetch('/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: taskValue, completed: false }),
-    }).then(() => {
-        taskInput.value = '';
-        fetchTasks();
+  if (deadline.length === 16) {
+    deadline += ":00";
+  }
+
+  const taskData = {
+    matkul: taskMatkul,
+    deadline: deadline,
+  };
+
+  fetch("/add-task", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(taskData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === "success") {
+        alert("Task added successfully");
+        location.reload();
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Failed to add task");
+    });
+});
+
+function deleteTask(taskID) {
+  fetch(`/delete-task?id=${taskID}`, {
+    method: "DELETE",
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === "success") {
+        alert("Task deleted successfully");
+        location.reload();
+      } else {
+        alert("Failed to delete task");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Error deleting task");
     });
 }
 
-function removeTask(button) {
-    const taskList = document.getElementById('taskList');
-    const taskItem = button.parentElement;
-    const taskText = taskItem.querySelector('span').textContent;
+// Contoh membuka modal menggunakan Bootstrap 5
+// Function to open the edit modal and populate the form with task data
+function openEditModal(id, matkul, deadline) {
+  // Set the task ID in the hidden input
+  document.getElementById("editTaskID").value = id;
 
-    // Send DELETE request to server
-    fetch('/tasks', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: taskText })
-    }).then(() => {
-        taskList.removeChild(taskItem);
+  // Populate the task data in the input fields
+  document.getElementById("editTaskMatkul").value = matkul;
+  document.getElementById("editDeadline").value = deadline;
+
+  // Open the modal
+  const modalElement = document.getElementById("editTaskModal"); // Fixed modal ID
+  const modal = new bootstrap.Modal(modalElement);
+  modal.show(); // Show the modal
+}
+
+// Function to update the task when the user clicks "Save changes"
+function updateTask() {
+  const taskID = document.getElementById("editTaskID").value;
+  const taskMatkul = document.getElementById("editTaskMatkul").value;
+  const deadline = document.getElementById("editDeadline").value;
+
+  const taskData = {
+    matkul: taskMatkul,
+    deadline: deadline,
+  };
+
+  fetch(`/update-task?id=${taskID}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(taskData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.status === "success") {
+        alert("Task updated successfully");
+        location.reload();
+      } else {
+        alert("Failed to update task");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Error updating task");
     });
 }
 
-function editTask(button) {
-    const taskItem = button.parentElement;
-    const taskText = taskItem.querySelector('span');
-    const currentText = taskText.innerText;
+// Function to update the task status when checkbox is clicked
+document.querySelectorAll(".statusCheckbox").forEach((checkbox) => {
+  checkbox.addEventListener("change", function () {
+    const taskID = this.getAttribute("data-id");
+    // Kirim 1 jika checkbox dicentang, 0 jika tidak dicentang
+    const completed = this.checked ? 1 : 0;
 
-    // Replace span with an input field for editing
-    const inputField = document.createElement('input');
-    inputField.type = 'text';
-    inputField.value = currentText;
-
-    taskItem.replaceChild(inputField, taskText);
-    button.textContent = 'Simpan';
-    button.onclick = function () {
-        const newText = inputField.value.trim();
-        taskText.innerText = newText;
-        taskItem.replaceChild(taskText, inputField);
-        button.textContent = 'Edit';
-
-        // Send PUT request to update task
-        fetch('/tasks', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: newText })
-        }).then(() => {
-            button.onclick = () => editTask(button);
-        });
-    };
-}
-
-window.onload = fetchTasks;
+    fetch(`/update-status?id=${taskID}&completed=${completed}`, {
+      method: "PUT",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status !== "success") {
+          alert("Failed to update status");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Failed to update status");
+      });
+  });
+});
