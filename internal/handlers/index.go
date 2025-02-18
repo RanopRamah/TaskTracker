@@ -26,13 +26,12 @@ func HandleAddTask(w http.ResponseWriter, r *http.Request) {
 		mahasiswaNPM, err := strconv.Atoi(cookie.Value)
 		if err != nil {
 			http.Error(w, "Invalid NPM", http.StatusBadRequest)
-			log.Println("Error parsing mahasiswa_npm:", err) // Log error if parsing fails
+			log.Println("Error parsing mahasiswa_npm:", err) 
 			return
 		}
 
-		log.Println("Parsed mahasiswa_npm:", mahasiswaNPM) // Log the parsed NPM
+		log.Println("Parsed mahasiswa_npm:", mahasiswaNPM) 
 
-		// If method is POST, we add the task
 		if r.Method == http.MethodPost {
 			log.Println("Content-Type:", r.Header.Get("Content-Type"))
 

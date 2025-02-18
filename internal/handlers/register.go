@@ -11,7 +11,7 @@ import (
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	var errorMessage string
 
-	// Get the DB connection
+	
 	db := database.GetDB()
 
 	if r.Method != http.MethodPost {

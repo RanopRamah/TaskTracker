@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
-	"TaskTracker/internal/database" // Import package database
-	"TaskTracker/internal/handlers" // Import package handlers
+	"TaskTracker/internal/database" 
+	"TaskTracker/internal/handlers" 
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 	http.HandleFunc("/delete-task", handlers.HandleDeleteTask)
 	http.HandleFunc("/update-task", handlers.HandleUpdateTask)
 
-	// Mulai server pada port yang ditentukan
+	
 	log.Println("Server is running on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

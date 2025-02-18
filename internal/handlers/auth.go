@@ -10,12 +10,11 @@ import (
 
 // handleLogout menangani logout pengguna
 func HandleLogout(w http.ResponseWriter, r *http.Request) {
-	// Menghapus cookie ketika logout
 	http.SetCookie(w, &http.Cookie{
 		Name:   "mahasiswa_npm",
 		Value:  "",
 		Path:   "/",
-		MaxAge: -1, // Menghapus cookie
+		MaxAge: -1, 
 	})
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
@@ -37,7 +36,6 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Mengambil koneksi dari database
 		db := database.GetDB()
 		var storedPassword string
 		err = db.QueryRow("SELECT password FROM mahasiswa WHERE npm = ?", mahasiswaNPM).Scan(&storedPassword)
@@ -57,13 +55,12 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Mengatur cookie setelah login berhasil
 		cookie := &http.Cookie{
 			Name:     "mahasiswa_npm",
 			Value:    mahasiswaNPM,
 			Path:     "/",
 			HttpOnly: true,
-			MaxAge:   3600, // Cookie berlaku selama 1 jam
+			MaxAge:   3600, 
 		}
 		http.SetCookie(w, cookie)
 
@@ -76,19 +73,16 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 // renderLoginPage menampilkan halaman login
 func RenderLoginPage(w http.ResponseWriter, errorMessage string) {
-	// Menampilkan template login.html dengan pesan error jika ada
 	tmpl, err := template.ParseFiles("templates/login.html")
 	if err != nil {
 		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
 	}
 
-	// Mengirimkan errorMessage ke template untuk ditampilkan
 	data := struct {
 		ErrorMessage string
 	}{ErrorMessage: errorMessage}
 
-	// Menjalankan template dan mengirimkan hasilnya ke response writer
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		http.Error(w, "Error rendering template", http.StatusInternalServerError)
